@@ -1,27 +1,37 @@
 //trigger to change related contact phone by parent account phone
+//trigger to change related contact's phone when parent's phone is changed
 trigger trg1 on Account(after Update)
 {
-    Map<Id,Account> accMap = new Map<Id,Account>();
-    if(trigger.isAfter && trigger.isUpdate)
+   Map<Id,Account> accMap = new Map<Id,Account>();
+    
+    if(trigger.isAfter && trigger.isUpdate))
     {
-        for(Account ac : trigger.new)
+        if(!trigger.new.isEmpty())
         {
-            if(trigger.newMap.get(ac.Id).Phone != trigger.oldMap.get(ac.Id).Phone)
+            for(Account ac : trigger.new)
             {
-                accMap.put(ac.Id,ac);
+                if(trigger.newMap.get(ac.Id).Phone != trigger.oldMap.get(ac.Id).Phone)
+                {
+                    accMap.put(ac.Id,ac);
+                }
             }
         }
     }
-    List<Contact> conList = [Select Id,Phone,AccountId from Contact where AccountId IN : accMap.keySet()];
+    
+    List<Contact> conList = [Select Id,AccountId,Phone from Contact where AccountId IN : accMap.keyset()];
     List<Contact> contList = new List<Contact>();
-    for(Contact con : conList)
+    
+    if(!conList.isEmpty())
     {
-        Account acc = accMap.get(con.AccountId);
-        con.Phone = acc.Phone;
-        contList.add(con);
+        for(Contact con : conList)
+        {
+            con.Phone = accMap.get(con.AccountId).Phone;
+            contList.add(con);
+        }
     }
-    if(contList.size() != null)
+    
+    if(!contList.isEmpty())
     {
-    update contList;
+        update contList;
     }
 }
